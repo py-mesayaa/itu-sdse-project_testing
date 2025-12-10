@@ -137,6 +137,12 @@ def save_results(model_results: Dict, path: str = "./artifacts/model_results.jso
         json.dump(model_results, results_file)
 
 
+def save_test_data(X_test: pd.DataFrame, y_test: pd.Series):
+    """Save test data for inference purposes."""
+    X_test.to_csv("./artifacts/X_test.csv", index=False)
+    y_test.to_csv("./artifacts/y_test.csv", index=False)
+
+
 def main():
     X, y = load_and_prepare_data()
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.15, stratify=y)
@@ -150,6 +156,7 @@ def main():
 
     save_columns(X_train)
     save_results(model_results)
+    save_test_data(X_test, y_test)
 
     # Optional: return artifacts for callers
     return {
