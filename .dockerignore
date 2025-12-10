@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Artifacts (will be generated in container)
+# Note: We exclude these to avoid copying large generated files
+# They will be created fresh inside the container
+artifacts/
+mlruns/
+*.pkl
+# Exclude JSON files from artifacts, but keep config files
+# We need to be careful - data files should be included
+# Exclude CSV files from artifacts directory only
+artifacts/*.csv
+artifacts/*.json
+
+# Documentation
+docs/_build/
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DVC
+.dvc/
+*.dvc
+
+# Original files (not needed in container)
+original_files/
+
+# Test files
+test_*.py
+*.test.py
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Logs
+*.log
+
