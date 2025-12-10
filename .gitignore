@@ -95,3 +95,6 @@ divine-tempo-*.json
 *credentials*.json
 
 .history/
+
+.venv
+artifacts/
