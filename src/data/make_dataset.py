@@ -158,6 +158,9 @@ def main(input_filepath, output_filepath, max_date, min_date):
 
     create_artifact_directory()
 
+    os.system("dvc update")
+    os.system("dvc pull")
+
     data = pd.read_csv(input_filepath)
 
     data, min_date, max_date = filter_by_date(data, max_date, min_date)
