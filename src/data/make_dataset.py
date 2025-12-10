@@ -4,6 +4,7 @@ import logging
 import os
 import json
 import datetime
+import warnings
 import numpy as np
 import pandas as pd
 import joblib
@@ -22,7 +23,15 @@ def impute_missing_values(x, method="mean"):
     if (x.dtype == "float64") | (x.dtype == "int64"):
         x = x.fillna(x.mean()) if method == "mean" else x.fillna(x.median())
     else:
-        x = x.fillna(x.mode()[0])
+        mode_value = x.mode()
+        if len(mode_value) > 0:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=FutureWarning, message=".*Downcasting.*")
+                x = x.fillna(mode_value[0])
+        else:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=FutureWarning, message=".*Downcasting.*")
+                x = x.fillna("")
     return x
 
 
@@ -57,9 +66,10 @@ def select_features(data):
 
 
 def clean_data(data):
-    data["lead_indicator"].replace("", np.nan, inplace=True)
-    data["lead_id"].replace("", np.nan, inplace=True)
-    data["customer_code"].replace("", np.nan, inplace=True)
+    data = data.copy()  # Explicit copy to avoid warnings
+    data["lead_indicator"] = data["lead_indicator"].replace("", np.nan)
+    data["lead_id"] = data["lead_id"].replace("", np.nan)
+    data["customer_code"] = data["customer_code"].replace("", np.nan)
 
     data = data.dropna(axis=0, subset=["lead_indicator"])
     data = data.dropna(axis=0, subset=["lead_id"])
@@ -148,7 +158,7 @@ def save_gold_dataset(data):
 
 
 @click.command()
-@click.argument("input_filepath", type=click.Path(exists=True))
+@click.argument("input_filepath", type=click.Path())
 @click.argument("output_filepath", type=click.Path())
 @click.option("--max-date", default="2024-01-31", help="Maximum date for filtering")
 @click.option("--min-date", default="2024-01-01", help="Minimum date for filtering")
@@ -158,8 +168,47 @@ def main(input_filepath, output_filepath, max_date, min_date):
 
     create_artifact_directory()
 
-    os.system("dvc update")
-    os.system("dvc pull")
+    # check if input file exists, if not, try to pull via DVC
+    input_path = Path(input_filepath)
+    if not input_path.exists():
+        logger.info(f"Input file not found: {input_filepath}. Attempting to pull via DVC...")
+
+        try:
+            import subprocess
+
+            # first try to update the DVC file
+            result = subprocess.run(
+                ["dvc", "update", "data/raw/raw_data.csv.dvc"], capture_output=True, text=True, check=False
+            )
+            if result.returncode != 0:
+                logger.warning(f"DVC update failed: {result.stderr}")
+
+            # then pull the data
+            logger.info("Running DVC pull to fetch data...")
+            result = subprocess.run(["dvc", "pull"], capture_output=True, text=True, check=False)
+            if result.returncode != 0:
+                logger.error(f"DVC pull failed: {result.stderr}")
+                raise click.FileError(
+                    input_filepath,
+                    hint="File not found and DVC pull failed. Check DVC configuration and remote storage.",
+                )
+
+            # check again if file exists after DVC pull
+            if not input_path.exists():
+                logger.error(f"Input file still does not exist after DVC pull: {input_filepath}")
+                raise click.FileError(
+                    input_filepath,
+                    hint="File not found after DVC pull. Verify the DVC file path and remote configuration.",
+                )
+            else:
+                logger.info(f"Successfully pulled data file: {input_filepath}")
+        except click.FileError:
+            raise
+        except Exception as e:
+            logger.error(f"DVC commands failed: {e}")
+            raise click.FileError(input_filepath, hint=f"Failed to pull data via DVC: {e}")
+    else:
+        logger.info(f"Input file found: {input_filepath}")
 
     data = pd.read_csv(input_filepath)
 
