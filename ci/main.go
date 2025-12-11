@@ -64,7 +64,17 @@ func main() {
 			"python", "-m", "src.models.train_model",
 		})
 
-	//step 7.
+	//Step 7. Model selection
+	image = executeStep(ctx, image, "model selection",
+		[]string{
+			"python", "-m", "src.models.model_selection",
+		})
+
+	//Step 8. Model deployment
+	image = executeStep(ctx, image, "model deployment",
+		[]string{
+			"python", "-m", "src.models.model_deploy",
+		})
 
 }
 
