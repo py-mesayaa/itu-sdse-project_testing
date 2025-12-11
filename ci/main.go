@@ -49,5 +49,16 @@ func main() {
 		panic(err)
 	}
 	fmt.Print(output)
-	fmt.Println("Python files are ready to run")
+
+	//Step 5. Run data processing
+	image = image.WithExec([]string{
+		"python", "-m", "src.data.make_dataset",
+		"data/raw/raw_data.csv",
+		"artifacts/train_data_gold.csv",
+	})
+	_, err = image.Sync(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Data processing completed successfully")
 }
