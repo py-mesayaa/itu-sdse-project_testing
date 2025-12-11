@@ -50,6 +50,17 @@ func main() {
 	}
 	fmt.Print(output)
 
+	// Step 4.5. Download raw data file from GitHub
+	// that's a work around to avoid using DVC to download the data file, i have no better idea to do this.
+	image = executeStep(ctx, image, "download raw data",
+		[]string{
+			"bash", "-c",
+			"mkdir -p data/raw && " +
+				"curl -fsSL https://raw.githubusercontent.com/Jeppe-T-K/itu-sdse-project-data/refs/heads/main/raw_data.csv " +
+				"-o data/raw/raw_data.csv && " +
+				"ls -lh data/raw/raw_data.csv",
+		})
+
 	//Step 5. Run data processing
 	image = executeStep(ctx, image, "data processing",
 		[]string{
@@ -104,13 +115,22 @@ func executeStep(ctx context.Context, c *dagger.Container, name string, cmd []st
 	next := c.WithExec(cmd)
 	_, err := next.Sync(ctx)
 	if err != nil {
-		// try to get stderr for better debugging
+		// try to get both stdout and stderr for better debugging
+		stdout, stdoutErr := next.Stdout(ctx)
 		stderr, stderrErr := next.Stderr(ctx)
 		errorMsg := fmt.Sprintf("step %s failed: %v", name, err)
+		if stdoutErr == nil && stdout != "" {
+			errorMsg += fmt.Sprintf("\nStdout: %s", stdout)
+		}
 		if stderrErr == nil && stderr != "" {
 			errorMsg += fmt.Sprintf("\nStderr: %s", stderr)
 		}
 		panic(errorMsg)
+	}
+	// Print stdout if available for successful steps
+	stdout, _ := next.Stdout(ctx)
+	if stdout != "" {
+		fmt.Print(stdout)
 	}
 	fmt.Printf("Step %s completed successfully\n", name)
 	return next
