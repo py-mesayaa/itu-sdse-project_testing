@@ -1,9 +1,7 @@
 name: Train Model
 
 on:
-  push:
-    branches:
-      - main
+  push: {} 
   pull_request:
     branches:
       - main
@@ -19,10 +17,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.24'
 
       - name: Install Dagger CLI
-        run: go install dagger.io/dagger/cmd/dagger@latest
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Run Dagger pipeline
         run: go run ci/main.go
