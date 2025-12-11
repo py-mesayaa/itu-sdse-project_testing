@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"dagger.io/dagger"
@@ -16,7 +17,7 @@ func main() {
 	}
 	defer client.Close()
 
-	//Step 2. Prepare source code directory
+	//Step 2. Prepare source code directory: exclude files that are not needed in the container
 	source := client.Host().Directory(".", dagger.HostDirectoryOpts{
 		Exclude: []string{
 			".git",
@@ -32,4 +33,13 @@ func main() {
 		},
 	})
 
+	//Step 3. Build Docker image from Dockerfile
+	image := source.DockerBuild()
+
+	_ = image //to avoid unused variable error
+	_, err = image.Sync(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Docker image built successfully")
 }
