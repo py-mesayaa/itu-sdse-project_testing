@@ -36,10 +36,18 @@ func main() {
 	//Step 3. Build Docker image from Dockerfile
 	image := source.DockerBuild()
 
-	_ = image //to avoid unused variable error
+	// _ = image //to avoid unused variable error
 	_, err = image.Sync(ctx)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Docker image built successfully")
+
+	// Step 4. Test the Docker image to ensure it is working
+	output, err := image.WithExec([]string{"python", "-c", "import sys; from src.data import make_dataset; print('Python imports working')"}).Stdout(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Print(output)
+	fmt.Println("Python files are ready to run")
 }
