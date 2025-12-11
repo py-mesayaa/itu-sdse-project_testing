@@ -76,6 +76,17 @@ func main() {
 			"python", "-m", "src.models.model_deploy",
 		})
 
+	//Step 9. Package model into /app/model directory
+	image = executeStep(ctx, image, "package model",
+		[]string{
+			"bash", "-c",
+			"mkdir -p model && " +
+				"cp artifacts/lead_model_lr.pkl model/model.pkl && " +
+				"cp artifacts/columns_list.json model/columns_list.json && " +
+				"cp artifacts/scaler.pkl model/scaler.pkl",
+		})
+
+	fmt.Println("\n=== Dagger pipeline completed successfully ===")
 }
 
 // executeStep executes a command in the container with logging and error handling
