@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"dagger.io/dagger"
@@ -17,5 +16,20 @@ func main() {
 	}
 	defer client.Close()
 
-	fmt.Println("Connected to Dagger!")
+	//Step 2. Prepare source code directory
+	source := client.Host().Directory(".", dagger.HostDirectoryOpts{
+		Exclude: []string{
+			".git",
+			".github",
+			"artifacts",
+			"mlruns",
+			"__pycache__",
+			"original_files",
+			"venv",
+			"env",
+			"ENV",
+			".venv",
+		},
+	})
+
 }
