@@ -61,4 +61,16 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Data processing completed successfully")
+
+	//Step 6. Model training
+	image = image.WithExec([]string{
+		"python", "-m", "src.models.train_model",
+		//no need to pass any arguments for model training, as
+		// it is hardcoded into the model training script
+	})
+	_, err = image.Sync(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Model training completed successfully")
 }
