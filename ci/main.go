@@ -95,7 +95,13 @@ func executeStep(ctx context.Context, c *dagger.Container, name string, cmd []st
 	next := c.WithExec(cmd)
 	_, err := next.Sync(ctx)
 	if err != nil {
-		panic(fmt.Sprintf("step %s failed: %v", name, err))
+		// try to get stderr for better debugging
+		stderr, stderrErr := next.Stderr(ctx)
+		errorMsg := fmt.Sprintf("step %s failed: %v", name, err)
+		if stderrErr == nil && stderr != "" {
+			errorMsg += fmt.Sprintf("\nStderr: %s", stderr)
+		}
+		panic(errorMsg)
 	}
 	fmt.Printf("Step %s completed successfully\n", name)
 	return next
