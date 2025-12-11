@@ -50,9 +50,8 @@ func main() {
 	}
 	fmt.Print(output)
 
-	// Step 4.5. Pull data file using DVC
-	// Ensure .dvc directory and data/raw/raw_data.csv.dvc are in the container
-	// another round: initialize a minimal git repo (DVC requires git) and then pull the data file
+	// Step 4.5. Pull data file using DVC with fallback to direct download
+	// Try DVC first, but if it fails (e.g., remote not configured properly), download directly
 	image = executeStep(ctx, image, "pull data with DVC",
 		[]string{
 			"bash", "-c",
@@ -60,7 +59,8 @@ func main() {
 				"git init && " +
 				"git config user.email 'ci@example.com' && " +
 				"git config user.name 'CI' && " +
-				"dvc pull data/raw/raw_data.csv && " +
+				"(dvc update data/raw/raw_data.csv.dvc && dvc pull data/raw/raw_data.csv || " +
+				"curl -fsSL https://raw.githubusercontent.com/Jeppe-T-K/itu-sdse-project-data/refs/heads/main/raw_data.csv -o data/raw/raw_data.csv) && " +
 				"ls -lh data/raw/raw_data.csv",
 		})
 

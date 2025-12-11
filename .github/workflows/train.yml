@@ -34,3 +34,17 @@ jobs:
           path: ./model
           retention-days: 7
 
+  validate-model:
+    needs: train
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download trained model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: model
+          path: ./model
+
+      - name: Run model validator
+        uses: lasselundstenjensen/itu-sdse-project-model-validator@main
+

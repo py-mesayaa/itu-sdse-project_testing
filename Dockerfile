@@ -7,9 +7,11 @@ WORKDIR /app
 # Install system dependencies needed for building Python packages
 # build-essential: needed for compiling some Python packages (like xgboost)
 # git: needed for DVC to work with git-based remotes
+# curl: needed for downloading data files as fallback
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and setup.py first for better Docker layer caching
