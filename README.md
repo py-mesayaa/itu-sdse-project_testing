@@ -253,3 +253,21 @@ The artifact is created in the `./model/` directory and can be:
 - Used locally for inference
 - Uploaded to GitHub Actions artifacts (in CI/CD)
 - Deployed to production environments
+
+## Development Practices
+
+### Commit Message Convention
+
+This project uses **Commitizen** for standardized commit messages following the [Conventional Commits](https://www.conventionalcommits.org/) specification. This ensures consistent, semantic commit messages that improve code history readability and enable automated versioning.
+
+#### Commit Types
+
+Common commit types used in this project:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+- `ci`: CI/CD changes
+- `build`: Build system changes
