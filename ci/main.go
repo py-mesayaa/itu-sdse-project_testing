@@ -86,6 +86,15 @@ func main() {
 				"cp artifacts/scaler.pkl model/scaler.pkl",
 		})
 
+	//Step 10. Export model directory from container to host
+	fmt.Println("\n=== Exporting model directory ===")
+	modelDir := image.Directory("/app/model")
+	_, err = modelDir.Export(ctx, "./model")
+	if err != nil {
+		panic(fmt.Sprintf("Failed to export model directory: %v", err))
+	}
+	fmt.Println("Model directory exported successfully to ./model")
+
 	fmt.Println("\n=== Dagger pipeline completed successfully ===")
 }
 
