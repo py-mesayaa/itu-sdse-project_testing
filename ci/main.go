@@ -50,14 +50,17 @@ func main() {
 	}
 	fmt.Print(output)
 
-	// Step 4.5. Download raw data file from GitHub
-	// that's a work around to avoid using DVC to download the data file, i have no better idea to do this.
-	image = executeStep(ctx, image, "download raw data",
+	// Step 4.5. Pull data file using DVC
+	// Ensure .dvc directory and data/raw/raw_data.csv.dvc are in the container
+	// another round: initialize a minimal git repo (DVC requires git) and then pull the data file
+	image = executeStep(ctx, image, "pull data with DVC",
 		[]string{
 			"bash", "-c",
 			"mkdir -p data/raw && " +
-				"curl -fsSL https://raw.githubusercontent.com/Jeppe-T-K/itu-sdse-project-data/refs/heads/main/raw_data.csv " +
-				"-o data/raw/raw_data.csv && " +
+				"git init && " +
+				"git config user.email 'ci@example.com' && " +
+				"git config user.name 'CI' && " +
+				"dvc pull data/raw/raw_data.csv && " +
 				"ls -lh data/raw/raw_data.csv",
 		})
 

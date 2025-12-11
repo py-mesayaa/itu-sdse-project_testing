@@ -46,8 +46,9 @@ docs/_build/
 Thumbs.db
 
 # DVC
-.dvc/
-*.dvc
+# Note: i need .dvc directory and .dvc files for DVC to work in the container
+# .dvc/
+# *.dvc
 
 # Original files (not needed in container)
 original_files/
