@@ -51,26 +51,31 @@ func main() {
 	fmt.Print(output)
 
 	//Step 5. Run data processing
-	image = image.WithExec([]string{
-		"python", "-m", "src.data.make_dataset",
-		"data/raw/raw_data.csv",
-		"artifacts/train_data_gold.csv",
-	})
-	_, err = image.Sync(ctx)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Data processing completed successfully")
+	image = executeStep(ctx, image, "data processing",
+		[]string{
+			"python", "-m", "src.data.make_dataset",
+			"data/raw/raw_data.csv",
+			"artifacts/train_data_gold.csv",
+		})
 
 	//Step 6. Model training
-	image = image.WithExec([]string{
-		"python", "-m", "src.models.train_model",
-		//no need to pass any arguments for model training, as
-		// it is hardcoded into the model training script
-	})
-	_, err = image.Sync(ctx)
+	image = executeStep(ctx, image, "model training",
+		[]string{
+			"python", "-m", "src.models.train_model",
+		})
+
+	//step 7.
+
+}
+
+// executeStep executes a command in the container with logging and error handling
+func executeStep(ctx context.Context, c *dagger.Container, name string, cmd []string) *dagger.Container {
+	fmt.Printf("\n=== Running step: %s ===\n", name)
+	next := c.WithExec(cmd)
+	_, err := next.Sync(ctx)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("step %s failed: %v", name, err))
 	}
-	fmt.Println("Model training completed successfully")
+	fmt.Printf("Step %s completed successfully\n", name)
+	return next
 }
